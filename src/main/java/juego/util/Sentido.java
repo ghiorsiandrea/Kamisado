@@ -7,6 +7,17 @@ package juego.util;
  * @version 1.0 20181008
  * @see juego.modelo.Tablero
  */
+
+/**
+ *La enumeración Sentido contiene los ocho sentidos de movimiento clásicos, en la dirección
+ * horizontal, vertical o diagonal, junto con su desplazamiento en filas y columnas correspondiente a cada
+ * caso.
+ * Se recuerda el uso del método values para obtener un array con todos los valores definidos en el tipo
+ * enumerado para simplificar el código. Es muy importante utilizar esta enumeración con los
+ * correspondientes valores de desplazamiento, para simplificar el código.
+ *  Este fichero se proporciona ya resuelto en UBUVirtual.
+ */
+
 public enum Sentido {
 	/**Noreste. */
 	DIAGONAL_NE(-1, +1),
