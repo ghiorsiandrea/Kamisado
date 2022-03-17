@@ -243,8 +243,6 @@ public class Arbitro {
         return true;
     }
 
-    //  TODO: DEJAR PARA EL FINAL
-
     /**
      *  El método hayBloqueoMutuo devuelve true si ninguno de los jugadores puede mover la torre
      * que corresponde, false en caso contrario.
