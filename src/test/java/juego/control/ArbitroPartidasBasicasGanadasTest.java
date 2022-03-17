@@ -31,7 +31,8 @@ import juego.modelo.Turno;
  * @see Tablero#obtenerCoordenadasEnNotacionAlgebraica(Celda)
  */
 @DisplayName("Tests básicos con partida ganada.")
-public class ArbitroPartidasBasicasGanadasTest {
+public class
+ArbitroPartidasBasicasGanadasTest {
 
 	/** Movimientos iniciales. */
 	static final String[] PARTIDA_BASICA_1 = { "c1c6", // NEGRAS torre roja a celda naranja en vertical

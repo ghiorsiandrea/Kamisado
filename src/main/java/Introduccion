@@ -34,3 +34,24 @@ Si se diese la situación de que el bloqueo se da en ambos jugadores, denominado
 finalizada, dando como perdedor al jugador que provocó dicha situación con un movimiento de torre.
 Es decir, pierde el jugador que hizo el último movimiento que no fuera de “distancia cero”.
 
+
+
+Variables de una clase
+
+Nivel accesibilidad + Tipo variable + Nombre variable; aqui le puedo o no dar valor
+Son para representar el estado de esa clase
+
+Constructor/es
+
+Nivel accesibilidad + Nombre constructor que coincide con la clase (parámetros, tipo y nombre) {
+ n cantidad de lineas de codigo }
+Son para crear nuevos objetos, dando un estado inicial a las variables de clase.
+
+Métodos
+
+Nivel de accesibilidad + Tipo de lo que retorna (puede ser void si no retorna nada) + Nombre método
+(parámetros, tipo y nombre) {
+n cantidad de lineas de codigo }
+Son para modificar/consultar el estado de los objetos.
+
+

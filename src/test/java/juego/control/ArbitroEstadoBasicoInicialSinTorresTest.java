@@ -64,8 +64,8 @@ public class ArbitroEstadoBasicoInicialSinTorresTest {
 	void comprobarEstadoInicialConTablero() {
 		assertAll("Estado inicial.",
 				() -> assertThat("El número de jugadas debería ser cero", arbitro.obtenerNumeroJugada(),is(0)),
-				() -> assertThat("No debería haber torres negras", tablero.obtenerNumeroTorres(Turno.BLANCO), is(0)),
-				() -> assertThat("No debería haber torres blancas", tablero.obtenerNumeroTorres(Turno.NEGRO), is(0)),
+				() -> assertThat("No debería haber torres blancas", tablero.obtenerNumeroTorres(Turno.BLANCO), is(0)),
+				() -> assertThat("No debería haber torres negras", tablero.obtenerNumeroTorres(Turno.NEGRO), is(0)),
 				() -> assertNull(arbitro.obtenerTurno(), "El turno no se asigna hasta colocar las torres"),
 				() -> assertThat("La partida no puede estar ganada al iniciarse sin torres.", arbitro.estaAlcanzadaUltimaFilaPor(arbitro.obtenerTurno()), is(false)),
 				() -> assertThat("No puede estar bloqueado el turno actual al iniciarse sin torres.", arbitro.estaBloqueadoTurnoActual(), is(false)));

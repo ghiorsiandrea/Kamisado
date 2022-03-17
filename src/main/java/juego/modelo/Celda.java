@@ -113,10 +113,10 @@ public class Celda {
         String turnoTxt;
         String colorTorreTxt;
         if (estaVacia()) {
-            turnoTxt = "Turno: -";
+            turnoTxt = " Turno: -";
             colorTorreTxt = " Torre: -";
         } else {
-            turnoTxt = "Turno: " + obtenerTurnoDeTorre().toChar();
+            turnoTxt = " Turno: " + obtenerTurnoDeTorre().toChar();
             colorTorreTxt = " Torre: " + obtenerColorDeTorre().toChar();
         }
         return filaTxt + columnaTxt + colorTxt + turnoTxt + colorTorreTxt;

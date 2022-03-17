@@ -148,6 +148,8 @@ public class ArbitroMovimientosBasicosLegalesIniciandoPartidaTest {
 	* 8 BN BZ BP BS BA BR BV BM
 	* 7 -- -- -- -- -- -- -- --
 	* 6 -- -- -- -- -- -- -- --
+	*
+	*
 	* 5 -- -- -- -- -- -- -- --
 	* 4 -- -- -- -- -- -- -- -- 
 	* 3 -- -- -- -- -- -- -- --

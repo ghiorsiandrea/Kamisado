@@ -1,6 +1,7 @@
 package juego.control;
 
 import juego.modelo.*;
+import juego.util.Sentido;
 
 /**
  * El paquete contiene una clase. Define la lógica de negocio o reglas del juego a implementar,
@@ -11,10 +12,27 @@ import juego.modelo.*;
  */
 public class Arbitro {
 
+// TODO: RECORDAR CAMBIAR ESTADOS
+
+    private Color colorCeldaUltimoMovimiento;
+
+    private Color colorPenultimoMovimiento;
+
     private Tablero tablero;
 
+    private Turno turnoActual;
+
+    private int numeroJugada;
+
+    private boolean ultimoMovimientoEsCero;
+
     public Arbitro(Tablero tablero) {
+        this.colorCeldaUltimoMovimiento = null;
+        this.colorPenultimoMovimiento = null;
         this.tablero = tablero;
+        this.turnoActual = null;
+        this.numeroJugada = 0;
+        this.ultimoMovimientoEsCero = false;
     }
 
     /**
@@ -22,6 +40,12 @@ public class Arbitro {
      * ◦ Nota: este método es amigable, y se limita su acceso a clases del mismo paquete. (PACKAGE PRIVATE)
      */
     void cambiarTurno() {
+
+        if (turnoActual == Turno.NEGRO) {
+            turnoActual = Turno.BLANCO;
+        } else {
+            turnoActual = Turno.NEGRO;
+        }
     }
 
     /**
@@ -29,6 +53,15 @@ public class Arbitro {
      * de ambos jugadores en sus filas correspondientes.
      */
     public void colocarTorres() {
+//          esta es la opcion larga, solo queda de ejemplo
+//        tablero.colocar(new Torre(Turno.BLANCO, Color.NARANJA), 0, 0);
+//        tablero.colocar(new Torre(Turno.BLANCO, Color.NARANJA), 0, 0);
+
+        for (int i = 0; i < tablero.obtenerNumeroColumnas(); i++) {
+            tablero.colocar(new Torre(Turno.BLANCO, tablero.obtenerCelda(0, i).obtenerColor()), 0, i);
+            tablero.colocar(new Torre(Turno.NEGRO, tablero.obtenerCelda(7, i).obtenerColor()), 7, i);
+        }
+        this.turnoActual = Turno.NEGRO;
     }
 
     /**
@@ -43,6 +76,27 @@ public class Arbitro {
      */
     public void colocarTorres(Torre[] torres, String[] coordenadas, Color ultimoColorTurnoNegro,
                               Color ultimoColorTurnoBlanco, Turno turnoActual) {
+
+        if (torres.length != coordenadas.length || torres.length == 0) {
+            return;
+        }
+        for (int i = 0; i < torres.length; i++) {
+//            Esta es una forma mas larga y ordenada de hacerlo
+//            Torre torre = torres[i];
+//            String coordenada = coordenadas[i];
+//            tablero.colocar(torre, coordenada);
+
+            tablero.colocar(torres[i], coordenadas[i]);
+        }
+        this.turnoActual = turnoActual;
+        if (turnoActual == Turno.NEGRO) {
+            colorCeldaUltimoMovimiento = ultimoColorTurnoBlanco;
+            colorPenultimoMovimiento = ultimoColorTurnoNegro;
+        } else {
+            colorCeldaUltimoMovimiento = ultimoColorTurnoNegro;
+            colorPenultimoMovimiento = ultimoColorTurnoBlanco;
+
+        }
     }
 
     /**
@@ -50,6 +104,16 @@ public class Arbitro {
      * del jugador contrario, o bien por existir bloqueo mutuo. Si no hay ganador devuelve null.
      */
     public Turno consultarGanador() {
+
+        if (estaAlcanzadaUltimaFilaPor(Turno.BLANCO)) {
+            return Turno.BLANCO;
+        }
+        if (estaAlcanzadaUltimaFilaPor(Turno.NEGRO)) {
+            return Turno.NEGRO;
+        }
+        if (hayBloqueoMutuo()) {
+            return obtenerTurnoSiguiente();
+        }
         return null;
     }
 
@@ -58,7 +122,24 @@ public class Arbitro {
      * realizar el movimiento con el turno actual, o false en caso contrario.
      */
     public boolean esMovimientoLegalConTurnoActual(Celda origen, Celda destino) {
-        return false;
+
+        if (origen.estaVacia() || !destino.estaVacia()) {
+            return false;
+        }
+        if (!tablero.estanVaciasCeldasEntre(origen, destino)) {
+            return false;
+        }
+        if (colorCeldaUltimoMovimiento != null && origen.obtenerColorDeTorre() != colorCeldaUltimoMovimiento) {
+            return false;
+        }
+
+        if (turnoActual == Turno.NEGRO && origen.obtenerFila() < destino.obtenerFila()) {
+            return false;
+        }
+        if (turnoActual == Turno.BLANCO && origen.obtenerFila() > destino.obtenerFila()) {
+            return false;
+        }
+        return turnoActual == origen.obtenerTurnoDeTorre();
     }
 
     /**
@@ -66,6 +147,20 @@ public class Arbitro {
      * de salida del jugador contrario, o false en caso contrario.
      */
     public boolean estaAlcanzadaUltimaFilaPor(Turno turno) {
+
+        if (turno == null) {
+            return false;
+        }
+        int ultimaFila = 0;
+        if (turno == Turno.BLANCO) {
+            ultimaFila = tablero.obtenerNumeroFilas() - 1;
+        }
+
+        for (int i = 0; i < tablero.obtenerNumeroColumnas(); i++) {
+            if (tablero.obtenerCelda(ultimaFila, i).obtenerTurnoDeTorre() == turno) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -74,15 +169,106 @@ public class Arbitro {
      * corresponde, o false en caso contrario.
      */
     public boolean estaBloqueadoTurnoActual() {
-        return false;
+        if (colorCeldaUltimoMovimiento == null) {
+            return false;
+        }
+        Celda celdaTurnoActualUtimoMovimiento = tablero.buscarTorre(turnoActual, colorCeldaUltimoMovimiento);
+
+        for (Sentido sentido : sentidosDeTurno(turnoActual)) {
+
+            int filaPosibleMovimiento = celdaTurnoActualUtimoMovimiento.obtenerFila() +
+                    sentido.obtenerDesplazamientoEnFilas();
+            int columnaPosibleMovimiento = celdaTurnoActualUtimoMovimiento.obtenerColumna() +
+                    sentido.obtenerDesplazamientoEnColumnas();
+            Celda celdaPosibleMovimiento = tablero.obtenerCelda(filaPosibleMovimiento, columnaPosibleMovimiento);
+
+            // Aca reutilizamos código pero la carga de trabajo es significativamente mayor a la solución siguiente
+            // if (esMovimientoLegalConTurnoActual(celdaTurnoActualUtimoMovimiento, celdaPosibleMovimiento)) {
+            // return false;
+            //
+            //}
+
+            if (celdaPosibleMovimiento != null && celdaPosibleMovimiento.estaVacia()) {
+                return false;
+            }
+
+        }
+
+        return true;
     }
+
+    private Turno obtenerTurnoSiguiente() {
+        if (turnoActual == Turno.BLANCO) {
+            return Turno.NEGRO;
+        } else {
+            return Turno.BLANCO;
+        }
+    }
+
+    /**
+     * Este mètodo no se està usando ya que al usar el turno siguiente habia una referencia circular con Consultar
+     * ganador y bloqueo mutuo (porque el ganador es el turno que no genera el bloqueo y porque si hay un ganador,
+     * entonces no hay bloqueo mutuo a futuro (pero en el pasado si lo hubo).)
+     * @return
+     */
+
+    private boolean estaBloqueadoTurnoSiguienteConTurnoActualBloqueado() {
+        // este if no es necesario ya que se evalua en el metodo establoqueadoturnoactual
+        if (colorCeldaUltimoMovimiento == null) {
+            return false;
+        }
+        Celda celdaTurnoActualUtimoMovimiento = tablero.buscarTorre(turnoActual, colorCeldaUltimoMovimiento);
+        Celda celdaTorreSiguienteMovimiento = tablero.buscarTorre(obtenerTurnoSiguiente(), celdaTurnoActualUtimoMovimiento.obtenerColor());
+
+        for (Sentido sentido : sentidosDeTurno(obtenerTurnoSiguiente())) {
+
+            int filaPosibleMovimiento = celdaTorreSiguienteMovimiento.obtenerFila() +
+                    sentido.obtenerDesplazamientoEnFilas();
+            int columnaPosibleMovimiento = celdaTorreSiguienteMovimiento.obtenerColumna() +
+                    sentido.obtenerDesplazamientoEnColumnas();
+            Celda celdaPosibleMovimiento = tablero.obtenerCelda(filaPosibleMovimiento, columnaPosibleMovimiento);
+
+            // Aca reutilizamos código pero la carga de trabajo es significativamente mayor a la solución siguiente
+            // if (esMovimientoLegalConTurnoActual(celdaTurnoActualUtimoMovimiento, celdaPosibleMovimiento)) {
+            // return false;
+            //
+            //}
+
+            if (celdaPosibleMovimiento != null && celdaPosibleMovimiento.estaVacia()) {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
+    //  TODO: DEJAR PARA EL FINAL
 
     /**
      *  El método hayBloqueoMutuo devuelve true si ninguno de los jugadores puede mover la torre
      * que corresponde, false en caso contrario.
      */
     public boolean hayBloqueoMutuo() {
-        return false;
+
+//        no puedo usar este metodo pues consultar ganador usa al metodo hay bloqueo mutuo
+//        if (consultarGanador() != null) {
+//            return false;
+//        }
+
+        if (ultimoMovimientoEsCero && estaBloqueadoTurnoActual()) {
+            return true;
+        } else return false;
+    }
+
+    private Sentido[] sentidosDeTurno(Turno turno) {
+
+        if (turno == Turno.BLANCO) {
+            return new Sentido[]{Sentido.DIAGONAL_SO, Sentido.VERTICAL_S, Sentido.DIAGONAL_SE};
+
+        } else {
+            return new Sentido[]{Sentido.DIAGONAL_NO, Sentido.VERTICAL_N, Sentido.DIAGONAL_NE};
+        }
     }
 
     /**
@@ -92,6 +278,13 @@ public class Arbitro {
      * cambiar el turno, teniendo en cuenta que se ha finalizado una jugada.
      */
     public void moverConTurnoActual(Celda origen, Celda destino) {
+
+        tablero.moverTorre(origen, destino);
+        this.numeroJugada++;
+        this.cambiarTurno();
+        colorPenultimoMovimiento = colorCeldaUltimoMovimiento;
+        colorCeldaUltimoMovimiento = destino.obtenerColor();
+        ultimoMovimientoEsCero = false;
     }
 
     /**
@@ -101,30 +294,40 @@ public class Arbitro {
      * para el turno actual y cambiar el turno, teniendo en cuenta que se ha finalizado una jugada.
      */
     public void moverConTurnoActualBloqueado() {
+        Celda celdaTorreConMovimientoCero = tablero.buscarTorre(turnoActual, colorCeldaUltimoMovimiento);
+        colorPenultimoMovimiento = colorCeldaUltimoMovimiento;
+        colorCeldaUltimoMovimiento = celdaTorreConMovimientoCero.obtenerColor();
+
+        this.numeroJugada++;
+        this.cambiarTurno();
+        ultimoMovimientoEsCero = true;
     }
 
     /**
      *  El método obtenerNumeroJugada consulta el número de jugadas finalizadas en la partida. Todos
      * los movimientos cuentan, tanto de torre a otra celda, y de “distancia cero”.
      */
-    public Object obtenerNumeroJugada() {
-        return null;
+    public int obtenerNumeroJugada() {
+        return numeroJugada;
     }
 
     /**
      *  El método obtenerTurno consulta qué jugador tiene el turno actualmente.
      */
     public Turno obtenerTurno() {
-        return null;
+        return turnoActual;
     }
 
     /**
      *  El método obtenerUltimoMovimiento devuelve el color de la celda donde realizó su último
      * movimiento la torre del turno indicado.
      */
-    public Color obtenerUltimoMovimiento(Turno negro) {
-        return null;
-    }
+    public Color obtenerUltimoMovimiento(Turno turno) {
+        if (turno == turnoActual) {
+            return colorPenultimoMovimiento;
+        }
+        return colorCeldaUltimoMovimiento;
 
+    }
 
 }

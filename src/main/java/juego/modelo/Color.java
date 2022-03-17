@@ -20,9 +20,9 @@ public enum Color {
     VERDE('V'),
     ROJO('R'),
     AMARILLO('A'),
-    ROSA('R'),
+    ROSA('S'),
     PURPURA('P'),
-    AZUL('A'),
+    AZUL('Z'),
     NARANJA('N');
 
     private char representacion;
